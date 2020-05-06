@@ -1,0 +1,9 @@
+doctype html
+block variablesInjection
+html
+    head
+    title #{title || "Academic PDF Search"}
+    link(rel='stylesheet', href='/static/css/bootstrap.css')
+    if cssThemeFilesList && !maintenance
+        each fileURL in cssThemeFilesList
+            link(rel='stylesheet', href=fileURL)

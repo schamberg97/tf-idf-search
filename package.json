@@ -1,0 +1,47 @@
+{
+  "name": "tf-idf",
+  "version": "0.0.5",
+  "description": "Academic PDF Search",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "buildProd": "webpack --config webpack.prod.js",
+    "buildDev": "webpack --config webpack.dev.js",
+    "watch": "webpack --config webpack.dev.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/schamberg97/tf-idf-search.git"
+  },
+  "author": "Nikolay Schamberg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/schamberg97/tf-idf-search/issues"
+  },
+  "homepage": "https://gitlab.com/schamberg97/tf-idf-search#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "connect-mongo": "^3.2.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-normalizeurl": "^1.5.1",
+    "express-sanitizer": "^1.0.5",
+    "express-session": "^1.17.1",
+    "file-type": "^14.2.0",
+    "fs-extra": "^9.0.0",
+    "helmet": "^3.22.0",
+    "http-shutdown": "^1.2.2",
+    "i18n": "^0.9.0",
+    "mime-type": "^3.0.7",
+    "mkdirp": "^1.0.4",
+    "moment": "^2.24.0",
+    "mongodb": "^3.5.6",
+    "multer": "^1.4.2",
+    "pdf2json": "^1.2.0",
+    "pug": "^2.0.4",
+    "python-shell": "^2.0.0",
+    "rate-limiter-flexible": "^2.1.4",
+    "stream-buffers": "^3.0.2"
+  }
+}

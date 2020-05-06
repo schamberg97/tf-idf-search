@@ -103,5 +103,7 @@ dist
 # TernJS port file
 .tern-port
 static
+output
 python/output/
 python/firstRunDone
+.DS_Store

@@ -1,0 +1,22 @@
+{
+    "articlesList": [
+        {
+            "title": "НАЗВАНИЕ_СТАТЬИ",
+            "description": "ОПИСАНИЕ",
+            "fileURL": "https://example.com/",
+            "authors": [
+                "Jeremy Bentham",
+                "Adam Smith"
+            ]
+        },
+        {
+            "title": "НАЗВАНИЕ_СТАТЬИ",
+            "description": "ОПИСАНИЕ",
+            "fileURL": "https://example.com/",
+            "authors": [
+                "Jeremy Bentham",
+                "Adam Smith"
+            ]
+        }
+    ]
+}
