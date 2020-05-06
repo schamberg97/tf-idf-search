@@ -4,6 +4,9 @@ html
     head
     title #{title || "Academic PDF Search"}
     link(rel='stylesheet', href='/static/css/bootstrap.css')
+    script(src='/static/js/lib/main.js')
     if cssThemeFilesList && !maintenance
         each fileURL in cssThemeFilesList
             link(rel='stylesheet', href=fileURL)
+    body
+        block body

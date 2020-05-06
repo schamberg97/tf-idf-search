@@ -113,7 +113,8 @@ module.exports = function (app, sessionMiddleware) {
             });
     })
     
-    require(path.resolve(__dirname + '/subroutines/uploadArticle.js'))(app) 
+    require(path.resolve(__dirname + '/subroutines/uploadArticle.js'))(app)
+    //require(path.resolve(__dirname + '/subroutines/searchArticle.js'))(app)
 
     app.get('/', (req,res) => {
         res.render('index')
