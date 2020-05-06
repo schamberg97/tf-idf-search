@@ -21,26 +21,43 @@ var upload = multer({limits: {fileSize: 1048576 * 2, files: 1}})
 
 module.exports = function (app) {
 
-    app.post('/createArticle/', (req,res,next) => {
+    function createArticle(req,res,next,noServe) {
         var articleDetails = {
             title: req.body.title,
             description: req.body.description,
-            authors: req.body.authors,
+            authors: req.body.authors.split(','),
             guid: simpleMathOps.guid(),
             searchEnabled: false,
         }
-        console.log(articleDetails)
+        req.body.guid = articleDetails.guid
         articles.insertOne(articleDetails, function(e,o) {
             if (e) {
                 finishServe(req,res,500,'error','db-error',null)
             }
             else {
                 delete articleDetails._id
-                finishServe(req,res,200,'success',null,articleDetails)
+                if (noServe) {
+                    next()
+                }
+                else {
+                    finishServe(req,res,200,'success',null,articleDetails)
+                }
             }
         })
+    }
+
+    app.post('/createArticle/', (req,res,next) => {
+        createArticle(req,res,next)
     })
 
+    app.post('/uploadArticle/', (req,res,next) => {
+        if (req.boy.title && req.body.description && req.body.authors) {
+            createArticle(req,res,next,true)
+        }
+        else {
+            next()
+        }
+    })
 
     app.post('/uploadArticle/', upload.single('article'), (req,res,next) => {
         
@@ -341,7 +358,7 @@ function furtherProcessing(articleGUID,tmpLoc,req,res) {
             let words = {
                 words: wordTfObj
             }
-            articles.findOneAndUpdate({guid:articleGUID}, {$set:words}, {returnOriginal : false}, function(e,o) {
+            articles.findOneAndUpdate({guid:articleGUID}, {$set:words, searchEnabled:true}, {returnOriginal : false}, function(e,o) {
                 if (e || !o) {
                     res.status(500).json({
                         status: 500,

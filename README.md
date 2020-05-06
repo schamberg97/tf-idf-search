@@ -1,44 +1,49 @@
 # TF-IDF MGIMO
 
-Студенческий проект МГИМО по поиску академических статей с использованием ранжирования по TF-IDF
+MGIMO Student project designed to searh academic articles with TF-IDF Algorithm
 
-## Суть проекта
+## License
 
-Система поиска и добавления академических статей в формате PDF на основе заранее подсчитанных TF и IDF по каждому слову в каждом документе.
+This project is licensed under MIT license. Take note, however, that some modules used in this project may be shared under a different license.
 
-## Реализация и Структура
+## Overall description
 
-### Реализация
+System for uploading academic articles in .PDF format, counting TF for each word & searching articles by ranking each word with TF-IDF algorithm
 
-Система состоит из двух принципиальных компонентов:
+## Implementation & structure
 
-1) Node.JS серверы, которые реализуют поиск статей и их загрузку в сервис. По сути, весь I/O с клиентом
-2) Python-скрипты, выполняющие подсчёт TF для каждого документа и общающиеся с Node.JS серверами через stdin/stdout.
+### Implementation
 
-При загрузке новой академической статьи, одна из инстанций Node.js сервера читает PDF-файл, переводит PDF в JSON
+System consists of two components:
+
+1) Node.JS servers, that implement article upload & search. All I/O with client
+2) Python-scripts, that count TF for every word in article.
+
+Upon upload of an article to the server, it reads PDF, translates it into plain text and then provides the plain text file to python scripts. Python mrjob scripts then analyze the file and produce several files that are concatenated by Node js through the standard UNIX cat command into a single file, which is then parsed. Each word and its TF is then written to MongoDB, together with a copy of a file.
 
 ### Структура
 
 #### С точки зрения порядка запуска
 
-[] - папка
+[] - Directory
 
-+ app.js - entrypoint-скрипт. Запускает все остальные компоненты
-    - primary.js - запускает несколько worker-процессов
-        - productInfo.js - сведения о продукте
-        - database.js - работает с базой данных и предоставляет интерфейс для доступа к БД MongoDB
-        - web.js - запускает веб-сервер
++ app.js - entrypoint-script. Bootstraps all other Node.JS components
+    - [./python/firstrun.py] - Makes sure all required python modules are installed and setup correctly
+    - primary.js - Launches several worker-processes
+        - productInfo.js - Product Info
+        - database.js - Works with MongoDB and provides API interfaces to work with it
+        - web.js - Launches web-server
             - [app]
                 - [server]
-                    - routes.js - роутер путей на сервере, предобработка соединения, поиск нужного пути и передача запроса в другие скрипты при необходимости, до обработки самого запроса
-                    - static.js - передача статики
+                    - routes.js - HTTP router
+                    - static.js - Static content server
                         - [subroutines]
-                            - searchArticle.js - поиск статьи
-                            - uploadArticle.js - загрузка статьи в систему, передача статьи для обработки Python-скриптам, запись данных в БД через database.js
-                                - [../../../python/]main.py - подсчёт TF для каждого слова в документе
-                            - другие скрипты
+                            - searchArticle.js - Article search
+                            - uploadArticle.js - Article upload, parsing & processing
+                                - [../../../python/] 
+                                    - tf-idf.py - TF processing
 
-#### С точки зрения файловой системы
+#### From the file system view point
 
 + app.js
 + primary.js
@@ -49,7 +54,7 @@
 + webpack.*.js
 + postcss.config.js
 + node_modules
-    - папки с node.js модулями
+    - Node js modules directory
 + app
     - server
         - routes.js
@@ -57,13 +62,15 @@
             - searchArticle.js
             - uploadArticle.js
             - static.js
-+ static (клиентские js скрипты, css и прочая статика). Должны скомпилироваться и/или скопироваться при первом запуске
++ static (client js scripts, css & other static content. Have to be compiled before first launch)
     - js
     - css
     - img
-+ src (исходные коды статики)
++ src (Static content sources)
     - js
     - css
     - img
 + python
-    - WORK IN PROGRESS
+    - tf-idf.py
+    - README.MD of original project
+    - firstrun.py - installs required modules

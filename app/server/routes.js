@@ -80,6 +80,11 @@ module.exports = function (app, sessionMiddleware) {
     app.use(sessionMiddleware)
     require(path.resolve(__dirname + '/static.js'))(app) 
 
+    app.all('*', (req,res,next) => {
+        console.log(req.method + ' ' + req.path)
+        next()
+    })
+
 	app.all('*', (req, res, next) => {
         let key = req.ip;
         let pointsToConsume = 1

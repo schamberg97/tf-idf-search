@@ -6,14 +6,84 @@ import '@fortawesome/fontawesome-free/scss/solid.scss'
 import '@fortawesome/fontawesome-free/scss/regular.scss'
 import '@fortawesome/fontawesome-free/scss/brands.scss'
 //import '@fortawesome/fontawesome-free/scss/v4-shims.scss';
-import jqueryForm from 'jquery-form'; 
+import jqueryForm from 'jquery-form';
+import bsCustomFileInput from 'bs-custom-file-input'
 //import '../../css/style.sass';
 
 global.jQuery = $;
 global.$ = $;
+global.uploadProhibited = true
 
 $(document).ready(function(){	
+    bsCustomFileInput.init()
+
+    $('input[type="file"]').on('change', function() {
+        Object.values(this.files).forEach(function(file) {
+            console.log(`Type: ${file.type}`);
+            if (file.type == 'application/pdf') {
+                global.uploadProhibited = false
+            }
+        })
+    })
+
+	function successFunc(responseText, status, xhr, $form) {
+		let response = responseText
+        console.log(response)
+		if (status == 'success') {
+			alert('Article successfully uploaded!')
+		}
+		else {
+			alert('Article failed to upload successfully...')
+        }
+        $('#fileLabel').text('Choose article file (.pdf)')
+    }
     
+    function beforeSubmitFunc(formData, jqForm, options) {
+        if (global.uploadProhibited == true) {
+            alert('File is not PDF, cannot upload')
+            return false;
+        }
+        else if (!$('#title-tf').val().length || !$('#description-tf').val().length || !$('#authorNames-tf').val().length) {
+            alert('You need to fill in information about the article')
+            return false
+        }
+        return true
+        
+    }
 
+	function formErrorFunc(e, textStatus) {	
+		if (e.status == 500 || textStatus == 'timeout') {
+			this.retryLimit--;
+			if (this.retryLimit) {
+				$.ajax(this);
+				return;
+            }
+            alert('Something went wrong. Contact support.')
+			return
+		}
+		else {
+			let response
+			if (e && e.responseText) {
+				response = JSON.parse(e.responseText)
+			}
+			else {
+				response = {}
+			}
+            console.log(response)
+            alert('Something went wrong. Contact support.')
+		}
+	}
 
+	$('#articleUpload').ajaxForm({
+        beforeSubmit: beforeSubmitFunc,
+		success: successFunc,
+		error: formErrorFunc,
+		retryLimit: 3,
+		url: '/uploadArticle/'
+	});
+    
 })
+
+function resetForm(retainData) {
+    return true
+}
