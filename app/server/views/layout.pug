@@ -3,6 +3,11 @@ block variablesInjection
 html
     head
     title #{title || "Academic PDF Search"}
+    // Fontawesome
+    link(rel='stylesheet', href='/static/css/fontawesome.css')
+    link(rel='stylesheet', href='/static/css/regular.css')
+    link(rel='stylesheet', href='/static/css/solid.css')
+    link(rel='stylesheet', href='/static/css/brands.css')
     link(rel='stylesheet', href='/static/css/bootstrap.css')
     script(src='/static/js/lib/main.js')
     if cssThemeFilesList && !maintenance

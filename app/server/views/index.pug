@@ -3,5 +3,45 @@ block body
     .container.mx-auto.mt-5
                 .card.mx-auto
                     .card-header
-                        h2.text-center What you wanna do?
+                        h2.text-center What do you want to do?
                     .card-body
+                        .row
+                            .col-6
+                                .card
+                                    .accordion#accordionOne
+                                        .card-header
+                                            .container.col-12.justify-content-center.text-center
+                                                button.btn(type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne") 
+                                                    h4 
+                                                        i.fas.fa-search  
+                                                        |  Search articles
+                                        #collapseOne.collapse(aria-labelledby="headingOne" data-parent="#accordionOne")
+                                            .card-body
+                                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                            .col-6
+                                .card
+                                    .accordion#accordionTwo
+                                        .card-header
+                                            .container.col-12.justify-content-center.text-center
+                                                button.btn(type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo") 
+                                                    h4 
+                                                        i.fas.fa-cloud-upload-alt  
+                                                        |  Upload articles
+                                        #collapseTwo.collapse(aria-labelledby="headingOne" data-parent="#accordionTwo")
+                                            .card-body
+                                                form#articleUpload.mt-3(method='post')
+                                                    .form-row
+                                                        .col
+                                                            input#title-tf(type="text" name="title" class="form-control" placeholder="Article title")
+                                                        .col
+                                                            input#authorNames-tf(type="text" name="authors" class="form-control" placeholder="Author names by comma")
+                                                    .form-row.mt-1
+                                                        .col
+                                                           textarea#description-tf.autofit.form-control(name="description" placeholder="Article description")
+                                                    .custom-file.mt-1
+                                                        input.custom-file-input#customFile(type="file", name="article")
+                                                        label#fileLabel.custom-file-label(for="customFile") Choose article file (.pdf)
+                                                    .container.col-12.justify-content-center.text-center
+                                                        button(type='submit')#submitArticleBtn.btn.btn-outline-dark.text-center.mt-3
+                                                            span.btnIcon.fas.fa-upload  
+                                                            text  Submit

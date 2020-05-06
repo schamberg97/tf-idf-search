@@ -21,90 +21,116 @@ var upload = multer({limits: {fileSize: 1048576 * 2, files: 1}})
 
 module.exports = function (app) {
 
-    app.post('/createArticle/', (req,res,next) => {
+    function createArticle(req,res,next,noServe) {
         var articleDetails = {
             title: req.body.title,
             description: req.body.description,
-            authors: req.body.authors,
+            authors: req.body.authors.split(',').map((item) => {return item.trim()}),
             guid: simpleMathOps.guid(),
             searchEnabled: false,
         }
-        console.log(articleDetails)
+        res.locals.guid = articleDetails.guid
+        if(req.body.parseImmediately) {
+            res.locals.parseImmediately = req.body.parseImmediately
+        }
         articles.insertOne(articleDetails, function(e,o) {
             if (e) {
                 finishServe(req,res,500,'error','db-error',null)
             }
             else {
                 delete articleDetails._id
-                finishServe(req,res,200,'success',null,articleDetails)
-            }
-        })
-    })
-
-
-    app.post('/uploadArticle/', upload.single('article'), (req,res,next) => {
-        
-                if (req.body.guid) {
-                    articles.find({guid: req.body.guid}, {_id: 1}).project({_id:1}).limit(1).toArray(function(err, document) {
-                        console.log(err)
-                        console.log(document)
-                        if (err) {
-                            finishServe(req,res,500,'error','db-error',null)
-                        }
-                        else if (!document || document.length !== 1) {
-                            finishServe(req,res,404,'error','article-not-found',null)
-                        }
-                        else {
-                            fileProcess()
-                        }
-                    });
-                    
+                if (noServe) {
+                    next()
                 }
                 else {
-                    //fileProcess()
-                    finishServe(req,res,500,'error','article-guid-not-specified',null)
+                    finishServe(req,res,200,'success',null,articleDetails)
                 }
-                function fileProcess() {
-   				    try {
-   				    	if (req.file) {
-				    		console.log('files was uploaded')
-				    		
-                            
-				    		if (req.file.mimetype == 'application/octet-stream' || !req.file.mimetype) {
-				    			var ext = path.extname(req.file.originalname);
-				    			if (ext) {
-				    				let extMime = mime.lookup(ext)
-				    				if (!extMime) {
-				    					backupCheck()
-				    				}
-				    				else {
-				    					req.file.mimetype = extMime;
-				    				}
-				    			}
-				    			else {
-				    				backupCheck()
-				    			}
-				    			function backupCheck() {
-				    				let ft = fileType(req.file.buffer)
-				    				if (ft.mime != "application/x-msi" && ft.mime != "application/x-executable" && ft.mime != "application/x-java-archive" && ft.mime != "application/x-msdos-program" && ft.mime != "application/vnd.microsoft.portable-executable") {
-				    					req.file.mimetype = ft.mime;
-				    					req.file.originalname = req.file.originalname + "." + ft.ext
-				    				}
-				    				else {
-				    					throw "bad-file"
-				    				}
-				    			}
-				    		}
-				    			//console.log(req.files[n]) 
-                            
-                        }
+            }
+        })
+    }
 
-				    	next()
-				    }
-				    catch (e) {
-                        finishServe(req,res,400,'error','possibly-bad-files',null)
-                    }
+    app.post('/createArticle/', (req,res,next) => {
+        createArticle(req,res,next)
+    })
+
+    app.post('/uploadArticle/', upload.single('article'), (req,res,next) => {
+        console.log(req.body)
+        console.log()
+        console.log(res.locals)
+        if (req.body.title && req.body.description && req.body.authors) {
+            res.setTimeout(500000, function(){
+                finishServe(req,res,503,'error','timeout',null)
+            })
+            createArticle(req,res,next,true)
+        }
+        else {
+            next()
+        }
+    })
+
+    app.post('/uploadArticle/', upload.single('article'), (req,res,next) => {
+        console.log(req.body)
+        console.log()
+        console.log(res.locals)
+        if (res.locals.guid || req.body.guid) {
+            articles.find({guid: res.locals.guid || req.body.guid}, {_id: 1}).project({_id:1}).limit(1).toArray(function(err, document) {
+                if (err) {
+                    finishServe(req,res,500,'error','db-error',null)
                 }
+                else if (!document || document.length !== 1) {
+                    finishServe(req,res,404,'error','article-not-found',null)
+                }
+                else {
+                    fileProcess()
+                }
+            });
+            
+        }
+        else {
+            //fileProcess()
+            finishServe(req,res,500,'error','article-guid-not-specified',null)
+        }
+        function fileProcess() {
+   		    try {
+   		    	if (req.file) {
+		    		console.log('file was uploaded')
+		    		
+                    
+		    		if (req.file.mimetype == 'application/octet-stream' || !req.file.mimetype) {
+		    			var ext = path.extname(req.file.originalname);
+		    			if (ext) {
+		    				let extMime = mime.lookup(ext)
+		    				if (!extMime) {
+		    					backupCheck()
+		    				}
+		    				else {
+		    					req.file.mimetype = extMime;
+		    				}
+		    			}
+		    			else {
+		    				backupCheck()
+		    			}
+		    			function backupCheck() {
+		    				let ft = fileType(req.file.buffer)
+		    				if (ft.mime != "application/x-msi" && ft.mime != "application/x-executable" && ft.mime != "application/x-java-archive" && ft.mime != "application/x-msdos-program" && ft.mime != "application/vnd.microsoft.portable-executable") {
+		    					req.file.mimetype = ft.mime;
+		    					req.file.originalname = req.file.originalname + "." + ft.ext
+		    				}
+		    				else {
+		    					throw "bad-file"
+		    				}
+		    			}
+		    		}
+		    			//console.log(req.files[n]) 
+                    
+                }
+
+		    	next()
+		    }
+		    catch (e) {
+                finishServe(req,res,400,'error','possibly-bad-files',null)
+            }
+        }
     })
 
     app.post('/uploadArticle/', (req,res,next) => {
@@ -142,12 +168,18 @@ module.exports = function (app) {
                         upload: 'ok',
                         id: fileGuid
                     }
-                    articles.findOneAndUpdate({guid:req.body.guid}, {$set:{fileGUID: fileGuid}}, {returnOriginal : false}, function(e,o) {
+                    articles.findOneAndUpdate({guid:res.locals.guid  || req.body.guid}, {$set:{fileGUID: fileGuid}}, {returnOriginal : false}, function(e,o) {
                         if (e || !o) {
                             finishServe(req,res,500,'error','failed-to-update-article-record',fileObj)
                         }
                         else {
-                            finishServe(req,res,null,null,null,fileObj)
+                            if (res.locals.parseImmediately) {
+                                parseArticle(req,res,fileGuid+'.pdf', res.locals.guid  || req.body.guid)
+                            }
+                            else {
+                                finishServe(req,res,null,null,null,fileObj)
+                            }
+                            
                         }
                     });
                     
@@ -174,9 +206,17 @@ module.exports = function (app) {
     	//		articlesBucket.openDownloadStreamByName(req.params.guid).pipe(res);
         //    });
         //console.log(os.tmpdir())
-        let fsFileName = os.tmpdir() + "/" + req.params.fileName
+        parseArticle(req,res,req.params.fileName, req.params.articleGUID)
+    })
+
+
+}
+
+function parseArticle(req,res,fileName,articleGUID) {
+
+    let fsFileName = os.tmpdir() + "/" + fileName
         var writeStream = fs.createWriteStream(fsFileName);
-        var dStream = articlesBucket.openDownloadStreamByName(path.basename(req.params.fileName)).pipe(writeStream)
+        var dStream = articlesBucket.openDownloadStreamByName(path.basename(fileName)).pipe(writeStream)
         .on('error', function (error) {
             console.log(error);
             res.status(404).json({ code: '404', status: 'error', error: "not-found" });
@@ -188,22 +228,20 @@ module.exports = function (app) {
             fs.readFile(fsFileName, (err, data) => {
                 if (err) {
                     res.status(500).json({
-                        status: 500,
-                        reason: "server-error",
+                        code: 500,
+                        status: "server-error",
                         stage: 1,
+                        reason:JSON.stringify(err)
                     })
                 }
                 else {
                     let file = {
                         buffer: data
                     }
-                    parsePDF(file, req.params.articleGUID,req,res)
+                    parsePDF(file, articleGUID,req,res)
                 }
             })
         }
-    })
-
-
 }
 
 function finishServe(req,res,statusCode,status,error,obj) {
@@ -255,10 +293,12 @@ function parsePDF(file, articleGUID, req,res) {
         fs.outputFile(tmpLoc + '/file.txt', text, function(err) {
             if (err) {
                 console.log(err)
+                
                 res.status(500).json({
-                    status: 500,
-                    reason: "server-error",
+                    code: 500,
+                    status: "server-error",
                     stage: 2,
+                    reason:JSON.stringify(err)
                 })
             }
             else {
@@ -300,9 +340,10 @@ function processFileTF(articleGUID, tmpLoc,req,res) {
         if (err) {
             console.log(err);
             res.status(500).json({
-                status: 500,
-                reason: "server-error",
+                code: 500,
+                status: "server-error",
                 stage: 3,
+                reason:JSON.stringify(err)
             })
         }
         else {
@@ -316,10 +357,12 @@ function furtherProcessing(articleGUID,tmpLoc,req,res) {
     fs.unlink(tmpLoc+'/file.txt', function (err) {
         if (err) {
             res.status(500).json({
-                status: 500,
-                reason: "server-error",
+                code: 500,
+                status: "server-error",
                 stage: 4,
+                reason: err
             })
+            
         }
         else {
             var concatArr = require('child_process').execSync('cat ' +tmpLoc+'/*').toString('UTF-8').split("\n")
@@ -338,21 +381,26 @@ function furtherProcessing(articleGUID,tmpLoc,req,res) {
                     wordTfObj[word] = tf
                 }
             })
-            let words = {
-                words: wordTfObj
+            let obj = {
+                words: wordTfObj,
+                searchEnabled:true
             }
-            articles.findOneAndUpdate({guid:articleGUID}, {$set:words}, {returnOriginal : false}, function(e,o) {
-                if (e || !o) {
+            console.log(obj)
+            console.log('articleGUID:' + articleGUID)
+            articles.findOneAndUpdate({guid:articleGUID}, {$set:obj}, {returnOriginal : false}, function(e,o) {
+                if (e || o == null) {
                     res.status(500).json({
-                        status: 500,
-                        reason: "server-error",
+                        code: 500,
+                        status: "server-error",
                         stage: 5,
+                        reason:JSON.stringify(e || 'generic-error')
                     })
                 }
                 else {
+                    console.log('got here')
                     res.status(200).json({
-                        status: 200,
-                        reason: "success"
+                        code: 200,
+                        status: "success"
                     })
                 }
             });
