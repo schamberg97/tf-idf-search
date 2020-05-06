@@ -30,12 +30,17 @@ $(document).ready(function(){
 		let response = responseText
         console.log(response)
 		if (status == 'success') {
-			alert('Article successfully uploaded!')
+            
+            changeBtnIcon(null, 'fas fa-check', 'enable')
+            alert('Article successfully uploaded!')
+            resetForm()
+            
 		}
 		else {
-			alert('Article failed to upload successfully...')
+            changeBtnIcon(null, 'fas fa-bomb', 'enable')
+            alert('Article failed to upload successfully...')
+            resetForm()
         }
-        $('#fileLabel').text('Choose article file (.pdf)')
     }
     
     function beforeSubmitFunc(formData, jqForm, options) {
@@ -47,18 +52,24 @@ $(document).ready(function(){
             alert('You need to fill in information about the article')
             return false
         }
+        changeBtnIcon(null, 'fas fa-circle-notch fa-spin', 'disable')
+        formData.push({ name: 'parseImmediately', value: true });
         return true
         
     }
 
 	function formErrorFunc(e, textStatus) {	
+        console.log(e.responseText)
+        console.log(textStatus)
 		if (e.status == 500 || textStatus == 'timeout') {
 			this.retryLimit--;
 			if (this.retryLimit) {
 				$.ajax(this);
 				return;
             }
+            changeBtnIcon(null, 'fa-bomb')
             alert('Something went wrong. Contact support.')
+            resetForm(true)
 			return
 		}
 		else {
@@ -70,7 +81,9 @@ $(document).ready(function(){
 				response = {}
 			}
             console.log(response)
+            changeBtnIcon(null, 'fa-bomb')
             alert('Something went wrong. Contact support.')
+            resetForm(true)
 		}
 	}
 
@@ -84,6 +97,35 @@ $(document).ready(function(){
     
 })
 
+
+function changeBtnIcon(remove,add, arg) {
+    if (!remove) {
+        $('#submitArticleBtn span').removeClass()
+    }
+    else {
+        $('#submitArticleBtn span').removeClass(remove)
+    }
+    $('#submitArticleBtn span').addClass(add);
+    
+    if (arg == 'disable') {
+        $('#submitArticleBtn').prop('disabled', true);
+        $('#submitArticleBtn p').text('Please wait...')
+    }
+    else {
+        $('#submitArticleBtn').prop('disabled', false);
+        $('#submitArticleBtn p').text('Submit')
+    }
+}
+
 function resetForm(retainData) {
+    changeBtnIcon(null, 'fas fa-upload', 'enable')
+    $('#fileLabel').text('Choose article file (.pdf)')
+    if (retainData != true) {
+        $('#title-tf').val(' ')
+        $('#authorNames-tf').val(' ')
+        $('#description-tf').val(' ')
+        $('#customFile').val(' ')
+    }
+    bsCustomFileInput.init()
     return true
 }
