@@ -31,7 +31,7 @@
     "express-normalizeurl": "^1.5.1",
     "express-sanitizer": "^1.0.5",
     "express-session": "^1.17.1",
-    "file-type": "^14.2.0",
+    "file-type": "^16.5.4",
     "fs-extra": "^9.0.0",
     "helmet": "^3.22.0",
     "http-shutdown": "^1.2.2",
